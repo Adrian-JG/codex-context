@@ -1,0 +1,34 @@
+name: Real Serena integration
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CODEX_CONTEXT_INTEGRATION: '1'
+      UV_TOOL_DIR: ${{ runner.temp }}/serena-tools
+      UV_TOOL_BIN_DIR: ${{ runner.temp }}/serena-bin
+      UV_CACHE_DIR: ${{ runner.temp }}/uv-cache
+      SERENA_HOME: ${{ runner.temp }}/serena-home
+      CODEX_HOME: ${{ runner.temp }}/codex-home
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+      - run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -e '.[dev]'
+          uv tool install -p 3.13 serena-agent==1.7.0
+          npm install --global @openai/codex@0.159.2
+          echo "$UV_TOOL_BIN_DIR" >> "$GITHUB_PATH"
+      - run: .venv/bin/python -m pytest -m integration -v

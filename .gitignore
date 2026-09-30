@@ -1,0 +1,9 @@
+.venv/
+.venv-integration/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+*.egg-info/
+.ai/.cache/
